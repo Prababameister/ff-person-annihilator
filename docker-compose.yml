@@ -1,0 +1,32 @@
+services:
+    ff-pa:
+        build:
+            context: ./ff-pa-image
+            dockerfile: Dockerfile
+        stdin_open: true
+        tty: true
+        environment:
+            DISPLAY: ff-pa-display-service:0
+        networks:
+            - ff-pa-display
+        volumes:
+            - ./ros2_ws:/ros2_ws
+        working_dir: /ros2_ws
+
+    ff-pa-display-service:
+        image: theasp/novnc:latest
+        ports:
+            - "5050:8080"
+        environment:
+            DISPLAY_WIDTH: 2000
+            DISPLAY_HEIGHT: 1500
+            RUN_XTERM: "no"
+        networks:
+            - ff-pa-display
+        deploy:
+            restart_policy:
+                condition: none
+
+networks:
+    ff-pa-display:
+        driver: bridge
