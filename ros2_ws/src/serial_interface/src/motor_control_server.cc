@@ -1,7 +1,7 @@
 #include "rclcpp/rclcpp.hpp"
 #include "serial_interface/srv/motor_control.hpp"
 
-#include <serial_interface/serial_interface.hh>
+#include "serial_interface/serial_interface.hh"
 
 #include <memory>
 
@@ -35,10 +35,10 @@ void change_motor_velocity(
 int main(int argc, char**argv) {
   rclcpp::init(argc, argv);
 
-  si = new SerialInterface("/tty0/ACM0");
+  si = new SerialInterface("/dev/ttyACM0");
   std::shared_ptr<rclcpp::Node> node = rclcpp::Node::make_shared("motor_control_server");
 
-  rclpp::Service<serial_interface::srv::MotorControl>::SharedPtr service =
+  rclcpp::Service<serial_interface::srv::MotorControl>::SharedPtr service =
     node->create_service<serial_interface::srv::MotorControl>("serial_interface/change_motor_velocity", change_motor_velocity);
 
   RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Ready to recieve motor instructions");

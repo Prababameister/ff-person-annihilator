@@ -1,15 +1,17 @@
 #pragma once
 
-#include <wiringSerial.h>
-
+#include <cstring>
+#include <algorithm>
 #include <string>
+
+#include <wiringSerial.h>
 
 class SerialInterface {
   public:
-    SerialInterface(char* device);
+    SerialInterface(std::string device);
     ~SerialInterface();
 
-    void send(char* s, int sz);
+    void send(char* s);
   private:
     int fd;
 

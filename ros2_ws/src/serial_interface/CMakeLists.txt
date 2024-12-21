@@ -11,29 +11,33 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
-find_package(serial_interface REQUIRED)
+find_library(wiringPi_LIB wiringPi)
 
-if(BUILD_TESTING)
-  find_package(ament_lint_auto REQUIRED)
-  # the following line skips the linter which checks for copyrights
-  # comment the line when a copyright and license is added to all source files
-  set(ament_cmake_copyright_FOUND TRUE)
-  # the following line skips cpplint (only works in a git repo)
-  # comment the line when this package is in a git repo and when
-  # a copyright and license is added to all source files
-  set(ament_cmake_cpplint_FOUND TRUE)
-  ament_lint_auto_find_test_dependencies()
-endif()
-
+# Generate ROS interfaces
 rosidl_generate_interfaces(${PROJECT_NAME}
   "srv/MotorControl.srv"
- )
+)
 
+# Find serial_interface after generating it
+find_package(serial_interface REQUIRED)
+
+# Add include directories
+INCLUDE_DIRECTORIES(include)
+
+# Add the shared library
+add_library(sil src/serial_interface.cc)
+
+# Add the executable
 add_executable(motor_controller src/motor_control_server.cc)
-ament_target_dependencies(motor_controller rclcpp serial_interface)
+target_link_libraries(motor_controller sil ${wiringPi_LIB})
 
+# Ensure all dependencies are correctly linked
+ament_target_dependencies(motor_controller rclcpp serial_interface)
+ 
+# Install targets
 install(TARGETS
-    motor_controller
+  motor_controller
   DESTINATION lib/${PROJECT_NAME})
 
 ament_package()
+

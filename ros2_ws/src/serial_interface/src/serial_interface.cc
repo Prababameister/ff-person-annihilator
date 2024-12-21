@@ -1,10 +1,10 @@
-#include <serial_interface/serial_interface.hh>
+#include "serial_interface/serial_interface.hh"
 
 char* SerialInterface::cobs_encode(char* msg) {
   int n = strlen(msg);
   int padding = n / 254 + (n % 254 > 0);
 
-  char* e = malloc(sizeof(char) * (n + padding) + 1);
+  char* e = new char[n + padding + 1];
   e[0] = 0;
 
   int i = 0, ei = 1;
@@ -31,12 +31,14 @@ char* SerialInterface::cobs_encode(char* msg) {
   return e;
 }
 
-void SerialInterface::send(char* s, int sz) {
-  serialPuts(fd, cobs_encode(s));
+void SerialInterface::send(char* s) {
+  char *e = cobs_encode(s);
+  serialPuts(fd, e);
+  delete e;
 }
 
-SerialInterface::SerialInterface(char* device) {
-  fd = serialOpen(device, 9600);
+SerialInterface::SerialInterface(std::string device) {
+  fd = serialOpen(device.c_str(), 9600);
 }
 SerialInterface::~SerialInterface() {
   serialClose(fd);
