@@ -8,9 +8,8 @@
 SerialInterface* si;
 
 struct motor_velocity {
-  float mv1;
-  float mv2;
-  float mv3;
+  uint32_t id;
+  double velocity;
 };
 
 void change_motor_velocity(
@@ -18,16 +17,25 @@ void change_motor_velocity(
   std::shared_ptr<serial_interface::srv::MotorControl::Response> response
 ) {
   motor_velocity m;
-  m.mv1 = request->mv1;
-  m.mv2 = request->mv2;
-  m.mv3 = request->mv3;
+  m.id = request->id;
+  m.velocity = request->velocity;
 
   RCLCPP_INFO(rclcpp::get_logger("rclcpp"),
-              "Recieved Motor Control speeds: mv1: %.6f - mv2: %.6f - mv3: %.6f\n",
-              m.mv1, m.mv2, m.mv3);
+              "Recieved Motor ID: %i with Control speed: %.6f\n",
+              m.id, m.velocity);
 
-  char* msg = reinterpret_cast<char*>(&m);
-  si->send(msg);
+  // Make message
+  int sz = sizeof(motor_velocity);
+  char* msg = new char[sz];
+  msg = reinterpret_cast<char*>(&m);
+
+  #ifdef RASP5
+  RCLCPP_INFO(rclcpp::get_logger("rclcpp"),
+              "Recieved %i bytes of data\n",
+              serialDataAvail(si->fd));
+  #endif
+
+  si->send(msg, sz);
 
   response->ack = true;
 }
@@ -45,4 +53,7 @@ int main(int argc, char**argv) {
 
   rclcpp::spin(node);
   rclcpp::shutdown();
+  delete si;
+
+  return 0;
 }

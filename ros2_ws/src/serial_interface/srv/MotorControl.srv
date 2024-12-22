@@ -1,5 +1,4 @@
-float64 mv1
-float64 mv2
-float64 mv3
+uint32 id
+float64 velocity
 ---
 bool ack

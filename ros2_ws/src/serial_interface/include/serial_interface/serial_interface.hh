@@ -4,16 +4,19 @@
 #include <algorithm>
 #include <string>
 
+#ifdef RASP5
 #include <wiringSerial.h>
+#endif
 
 class SerialInterface {
   public:
     SerialInterface(std::string device);
     ~SerialInterface();
 
-    void send(char* s);
+    void send(char* s, int sz);
   private:
     int fd;
 
-    char* cobs_encode(char* msg);
+    void print_byte_stream(char* msg, int sz);
+    char* cobs_encode(char* msg, int& sz);
 };
