@@ -9,7 +9,7 @@ SerialInterface* si;
 
 struct motor_velocity {
   uint32_t id;
-  double velocity;
+  char velocity[12];
 };
 
 void change_motor_velocity(
@@ -18,22 +18,16 @@ void change_motor_velocity(
 ) {
   motor_velocity m;
   m.id = request->id;
-  m.velocity = request->velocity;
+  sprintf(m.velocity, "%f", request->velocity);
 
   RCLCPP_INFO(rclcpp::get_logger("rclcpp"),
               "Recieved Motor ID: %i with Control speed: %.6f\n",
-              m.id, m.velocity);
+              m.id, request->velocity);
 
   // Make message
   int sz = sizeof(motor_velocity);
   char* msg = new char[sz];
   msg = reinterpret_cast<char*>(&m);
-
-  #ifdef RASP5
-  RCLCPP_INFO(rclcpp::get_logger("rclcpp"),
-              "Recieved %i bytes of data\n",
-              serialDataAvail(si->fd));
-  #endif
 
   si->send(msg, sz);
 

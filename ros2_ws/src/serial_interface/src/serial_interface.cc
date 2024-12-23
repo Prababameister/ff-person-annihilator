@@ -45,10 +45,10 @@ void SerialInterface::send(char* s, int sz) {
   char *e = cobs_encode(s, sz);
 #ifdef RASP5
   serialPuts(fd, e);
-#else
+  printf("Recieved %i bytes of data\n", serialDataAvail(fd));
+#endif
   printf("COBS-encoded byte stream: ");
   print_byte_stream(e, sz);
-#endif
 
   delete e;
 }
@@ -62,9 +62,16 @@ void SerialInterface::print_byte_stream (char* msg, int sz) {
 
 SerialInterface::SerialInterface(std::string device) {
   #ifdef RASP5
-  fd = serialOpen(device.c_str(), 9600);
-  #endif
   printf("Using device: %s\n", device.c_str());
+  fd = serialOpen(device.c_str(), 9600);
+  printf("Debug: %i\n", fd);	
+  if (fd == -1) {
+    printf("Serial Port opening of '%s' failed\n", device.c_str());
+  }
+
+  #else 
+  printf("Using dummy device: %s\n", device.c_str());
+  #endif
 }
 SerialInterface::~SerialInterface() {
   #ifdef RASP5
